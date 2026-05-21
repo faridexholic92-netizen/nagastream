@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: nagastream
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_PATH
+        value: /data/nagastream.db
+    disk:
+      name: nagastream-data
+      mountPath: /data
+      sizeGB: 1

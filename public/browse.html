@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse — NagaStream</title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<nav id="navbar">
+  <a href="/" class="nav-logo">
+    <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="url(#g1)"/><path d="M12 20l6-8 4 5 3-3 5 6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="g1" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#7c3aed"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs></svg>
+    NagaStream
+  </a>
+  <div class="nav-links">
+    <a href="/">Home</a><a href="/browse" class="active">Browse</a>
+    <a href="/browse?provider=dramabox">DramaBox</a>
+    <a href="/browse?provider=reelshort">ReelShort</a>
+    <a href="/browse?provider=shorttv">ShortMax</a>
+    <a href="/browse?provider=goodshort">GoodShort</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-avatar" id="navAvatar"><span id="navAvatarInitial">U</span>
+      <div class="nav-dropdown" id="navDropdown">
+        <div style="padding:.5rem .75rem .25rem;font-size:.8rem;color:var(--text3)">Signed in as</div>
+        <div style="padding:0 .75rem .5rem;font-size:.875rem;font-weight:600" id="navUsername"></div>
+        <hr>
+        <a href="/admin" id="adminLink" class="hidden">⚙️ Admin Panel</a>
+        <button onclick="NS.logout()">🚪 Sign Out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div style="height:64px"></div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+  <div style="position:relative">
+    <svg style="position:absolute;left:.7rem;top:50%;transform:translateY(-50%);width:15px;color:var(--text3)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Search dramas..." style="padding-left:2.25rem;min-width:220px" class="form-control" value="">
+  </div>
+  <select id="providerFilter" class="form-control">
+    <option value="">All Providers</option>
+    <option value="dramabox">DramaBox</option>
+    <option value="reelshort">ReelShort</option>
+    <option value="shorttv">ShortMax</option>
+    <option value="goodshort">GoodShort</option>
+  </select>
+  <select id="genreFilter" class="form-control">
+    <option value="">All Genres</option>
+  </select>
+  <div id="resultCount" style="font-size:.8rem;color:var(--text3);margin-left:auto"></div>
+</div>
+
+<main style="padding:2rem">
+  <div class="drama-grid lg" id="dramaGrid">
+    <div style="grid-column:1/-1;display:flex;justify-content:center;padding:4rem">
+      <div class="spinner"></div>
+    </div>
+  </div>
+  <div id="paginationEl"></div>
+</main>
+
+<footer style="padding:2rem;text-align:center;color:var(--text3);font-size:.8rem;border-top:1px solid var(--border)">
+  🐉 NagaStream &copy; 2026
+</footer>
+
+<div id="toast-container"></div>
+<script src="/js/app.js"></script>
+<script>
+let state = { q:'', provider:'', genre:'', page:1 }
+
+async function init() {
+  const user = await NS.loadUser()
+  if (!user) return window.location.href = '/login'
+  NS.initNavbar()
+
+  // Parse URL params
+  const p = new URLSearchParams(window.location.search)
+  state.q        = p.get('q')        || ''
+  state.provider = p.get('provider') || ''
+  state.genre    = p.get('genre')    || ''
+  state.page     = parseInt(p.get('page')) || 1
+
+  document.getElementById('searchInput').value   = state.q
+  document.getElementById('providerFilter').value = state.provider
+
+  // Load genres
+  const genres = await NS.api('/dramas/genres')
+  const gSel   = document.getElementById('genreFilter')
+  genres.forEach(g => {
+    const opt = document.createElement('option')
+    opt.value = g; opt.textContent = g
+    if (g === state.genre) opt.selected = true
+    gSel.appendChild(opt)
+  })
+
+  // Events
+  let searchTimer
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => { state.q = e.target.value; state.page = 1; load() }, 400)
+  })
+  document.getElementById('providerFilter').addEventListener('change', (e) => {
+    state.provider = e.target.value; state.page = 1; load()
+  })
+  document.getElementById('genreFilter').addEventListener('change', (e) => {
+    state.genre = e.target.value; state.page = 1; load()
+  })
+
+  load()
+}
+
+async function load() {
+  const grid = document.getElementById('dramaGrid')
+  grid.innerHTML = '<div style="grid-column:1/-1;display:flex;justify-content:center;padding:4rem"><div class="spinner"></div></div>'
+
+  const params = new URLSearchParams({ q: state.q, provider: state.provider, genre: state.genre, page: state.page, limit: 24 })
+  const data   = await NS.api('/dramas?' + params)
+
+  document.getElementById('resultCount').textContent = `${data.total.toLocaleString()} dramas found`
+
+  if (!data.dramas.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--text3)"><div style="font-size:3rem;margin-bottom:1rem">🎭</div><p>No dramas found. Try a different search.</p></div>'
+    document.getElementById('paginationEl').innerHTML = ''
+    return
+  }
+
+  grid.innerHTML = data.dramas.map(d => NS.makeDramaCard(d)).join('')
+  document.getElementById('paginationEl').innerHTML = NS.makePagination(data.page, data.pages, 'goPage')
+}
+
+function goPage(n) { state.page = n; load(); window.scrollTo(0,0) }
+
+init()
+</script>
+</body>
+</html>

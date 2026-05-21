@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — NagaStream</title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-logo">🐉 NagaStream</div>
+    <nav class="admin-nav">
+      <a href="/admin" class="active" id="navDashboard">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="#" onclick="showTab('dramas')" id="navDramas">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4"/></svg>
+        Dramas
+      </a>
+      <a href="#" onclick="showTab('users')" id="navUsers">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        Users
+      </a>
+      <a href="/" style="margin-top:auto">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Back to Site
+      </a>
+      <button onclick="NS.logout()" style="display:flex;align-items:center;gap:.65rem;padding:.65rem .85rem;border-radius:8px;font-size:.875rem;font-weight:500;color:var(--text2);background:none;border:none;width:100%;cursor:pointer;transition:.2s" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='none'">
+        <svg width="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Sign Out
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+
+    <!-- Dashboard Tab -->
+    <div id="tabDashboard">
+      <div class="admin-header">
+        <h1>Dashboard</h1>
+        <p id="adminWelcome">Welcome back!</p>
+      </div>
+      <div class="stat-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-card-label">Total Dramas</div><div class="stat-card-value" id="sDramas">—</div></div>
+        <div class="stat-card"><div class="stat-card-label">Total Episodes</div><div class="stat-card-value" id="sEps">—</div></div>
+        <div class="stat-card"><div class="stat-card-label">Total Users</div><div class="stat-card-value" id="sUsers">—</div></div>
+        <div class="stat-card"><div class="stat-card-label">Total Views</div><div class="stat-card-value" id="sViews">—</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;flex-wrap:wrap">
+        <!-- Provider breakdown -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+          <div style="font-weight:700;margin-bottom:1rem">📊 Dramas by Provider</div>
+          <div id="providerBreakdown"></div>
+        </div>
+        <!-- Recent dramas -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+          <div style="font-weight:700;margin-bottom:1rem">🆕 Recently Added</div>
+          <div id="recentDramas"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dramas Tab -->
+    <div id="tabDramas" class="hidden">
+      <div class="admin-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div><h1>Dramas</h1><p>Manage all scraped dramas</p></div>
+      </div>
+      <div style="display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap">
+        <input type="text" id="dramaSearch" class="form-control" placeholder="Search dramas..." style="max-width:280px">
+        <select id="dramaProviderFilter" class="form-control">
+          <option value="">All Providers</option>
+          <option value="dramabox">DramaBox</option>
+          <option value="reelshort">ReelShort</option>
+          <option value="shorttv">ShortMax</option>
+          <option value="goodshort">GoodShort</option>
+        </select>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <table class="data-table" id="dramasTable">
+          <thead><tr>
+            <th>Title</th><th>Provider</th><th>Episodes</th><th>Views</th><th>Action</th>
+          </tr></thead>
+          <tbody id="dramasBody"></tbody>
+        </table>
+      </div>
+      <div id="dramasPagination"></div>
+    </div>
+
+    <!-- Users Tab -->
+    <div id="tabUsers" class="hidden">
+      <div class="admin-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div><h1>Users</h1><p>Manage user accounts</p></div>
+        <button class="btn btn-primary" onclick="openAddUser()">+ Add User</button>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <table class="data-table">
+          <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr></thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal-overlay hidden" id="addUserModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New User</h3>
+      <button onclick="closeModal('addUserModal')" style="background:none;border:none;color:var(--text2);font-size:1.25rem;cursor:pointer">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Username</label><input type="text" id="newUsername" class="form-control" placeholder="johndoe"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="newEmail" class="form-control" placeholder="john@example.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="newPassword" class="form-control" placeholder="Min 6 characters"></div>
+      <div class="form-group"><label>Role</label>
+        <select id="newRole" class="form-control">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createUser()">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal-overlay hidden" id="resetPwModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Reset Password</h3>
+      <button onclick="closeModal('resetPwModal')" style="background:none;border:none;color:var(--text2);font-size:1.25rem;cursor:pointer">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="resetUserId">
+      <div class="form-group"><label>New Password</label><input type="password" id="resetPassword" class="form-control" placeholder="Min 6 characters"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('resetPwModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="doResetPw()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/js/app.js"></script>
+<script>
+let dramasState = { q:'', provider:'', page:1 }
+
+async function init() {
+  const user = await NS.loadUser()
+  if (!user) return window.location.href = '/login'
+  if (!['admin','superadmin'].includes(user.role)) return window.location.href = '/'
+
+  document.getElementById('adminWelcome').textContent = `Welcome back, ${user.username}! (${user.role})`
+
+  loadStats()
+}
+
+async function loadStats() {
+  const s = await NS.api('/admin/stats')
+  document.getElementById('sDramas').textContent = s.totalDramas.toLocaleString()
+  document.getElementById('sEps').textContent    = s.totalEpisodes.toLocaleString()
+  document.getElementById('sUsers').textContent  = s.totalUsers.toLocaleString()
+  document.getElementById('sViews').textContent  = (s.totalViews||0).toLocaleString()
+
+  const pb = document.getElementById('providerBreakdown')
+  pb.innerHTML = s.byProvider.map(p => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:.875rem">${p.provider}</span>
+      <span style="font-weight:700;color:var(--accent2)">${p.count}</span>
+    </div>
+  `).join('')
+
+  const rd = document.getElementById('recentDramas')
+  rd.innerHTML = s.recentDramas.map(d => `
+    <div style="padding:.5rem 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:.875rem;font-weight:500">${NS.esc(d.title)}</div>
+      <div style="font-size:.75rem;color:var(--text3)">${d.provider} · ${d.created_at?.split('T')[0]||''}</div>
+    </div>
+  `).join('')
+}
+
+function showTab(name) {
+  ['Dashboard','Dramas','Users'].forEach(t => {
+    document.getElementById(`tab${t}`).classList.add('hidden')
+    document.getElementById(`nav${t}`)?.classList.remove('active')
+  })
+  document.getElementById(`tab${name.charAt(0).toUpperCase()+name.slice(1)}`).classList.remove('hidden')
+  document.getElementById(`nav${name.charAt(0).toUpperCase()+name.slice(1)}`)?.classList.add('active')
+
+  if (name === 'dramas') loadDramas()
+  if (name === 'users')  loadUsers()
+}
+
+async function loadDramas() {
+  const params = new URLSearchParams({ q: dramasState.q, provider: dramasState.provider, page: dramasState.page, limit: 20 })
+  const data   = await NS.api('/dramas?' + params)
+  const tbody  = document.getElementById('dramasBody')
+  tbody.innerHTML = data.dramas.map(d => `
+    <tr>
+      <td><a href="/drama/${d.slug}" target="_blank" style="color:var(--accent2)">${NS.esc(d.title)}</a></td>
+      <td><span class="badge badge-${d.provider_key}">${d.provider}</span></td>
+      <td>${d.total_episodes}</td>
+      <td>${(d.views||0).toLocaleString()}</td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="deleteDrama(${d.id},'${NS.esc(d.title)}')">Delete</button>
+      </td>
+    </tr>
+  `).join('')
+  document.getElementById('dramasPagination').innerHTML = NS.makePagination(data.page, data.pages, 'dramaPaginate')
+}
+
+function dramaPaginate(n) { dramasState.page = n; loadDramas() }
+
+let searchTimer2
+document.addEventListener('DOMContentLoaded', () => {
+  const ds = document.getElementById('dramaSearch')
+  const dp = document.getElementById('dramaProviderFilter')
+  if (ds) ds.addEventListener('input', e => { clearTimeout(searchTimer2); searchTimer2 = setTimeout(() => { dramasState.q = e.target.value; dramasState.page=1; loadDramas() }, 300) })
+  if (dp) dp.addEventListener('change', e => { dramasState.provider = e.target.value; dramasState.page=1; loadDramas() })
+})
+
+async function deleteDrama(id, title) {
+  if (!confirm(`Delete "${title}"?`)) return
+  await NS.api('/dramas/' + id, { method: 'DELETE' })
+  NS.toast('Deleted', 'success')
+  loadDramas(); loadStats()
+}
+
+async function loadUsers() {
+  const users = await NS.api('/admin/users')
+  const tbody = document.getElementById('usersBody')
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td style="font-weight:500">${NS.esc(u.username)}</td>
+      <td style="color:var(--text2)">${NS.esc(u.email)}</td>
+      <td><span class="badge badge-${u.role}">${u.role}</span></td>
+      <td><span class="badge ${u.active ? 'badge-active':'badge-inactive'}">${u.active ? 'Active':'Inactive'}</span></td>
+      <td style="color:var(--text3);font-size:.8rem">${u.last_login ? u.last_login.split('T')[0] : 'Never'}</td>
+      <td>
+        ${u.role !== 'superadmin' ? `
+          <button class="btn btn-outline btn-sm" onclick="openResetPw(${u.id})">Reset PW</button>
+          <button class="btn btn-sm" style="background:${u.active?'rgba(239,68,68,.15)':'rgba(16,185,129,.15)'};color:${u.active?'var(--red)':'var(--green)'};border:1px solid ${u.active?'rgba(239,68,68,.3)':'rgba(16,185,129,.3)'}" onclick="toggleUser(${u.id},${u.active})">${u.active ? 'Disable':'Enable'}</button>
+        ` : '<span style="color:var(--text3);font-size:.78rem">Protected</span>'}
+      </td>
+    </tr>
+  `).join('')
+}
+
+function openAddUser() { document.getElementById('addUserModal').classList.remove('hidden') }
+function openResetPw(id) { document.getElementById('resetUserId').value = id; document.getElementById('resetPwModal').classList.remove('hidden') }
+function closeModal(id) { document.getElementById(id).classList.add('hidden') }
+
+async function createUser() {
+  const u = document.getElementById('newUsername').value
+  const e = document.getElementById('newEmail').value
+  const p = document.getElementById('newPassword').value
+  const r = document.getElementById('newRole').value
+  if (!u||!e||!p) return NS.toast('All fields required', 'error')
+  try {
+    await NS.api('/auth/register', { method:'POST', body:{username:u,email:e,password:p,role:r} })
+    NS.toast('User created!', 'success')
+    closeModal('addUserModal')
+    loadUsers()
+  } catch(err) { NS.toast(err.message, 'error') }
+}
+
+async function doResetPw() {
+  const id = document.getElementById('resetUserId').value
+  const pw = document.getElementById('resetPassword').value
+  if (!pw || pw.length < 6) return NS.toast('Password too short', 'error')
+  await NS.api(`/admin/users/${id}/reset-password`, { method:'POST', body:{password:pw} })
+  NS.toast('Password reset!', 'success')
+  closeModal('resetPwModal')
+}
+
+async function toggleUser(id, active) {
+  await NS.api(`/admin/users/${id}`, { method:'PATCH', body:{active: !active} })
+  NS.toast(active ? 'User disabled' : 'User enabled', 'success')
+  loadUsers()
+}
+
+init()
+</script>
+</body>
+</html>

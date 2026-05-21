@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NagaStream — Watch Short Dramas Online</title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="logo">🐉 NagaStream</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- Navbar -->
+<nav id="navbar">
+  <a href="/" class="nav-logo">
+    <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="url(#g1)"/><path d="M12 20l6-8 4 5 3-3 5 6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="g1" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#7c3aed"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs></svg>
+    NagaStream
+  </a>
+  <div class="nav-links">
+    <a href="/" class="active">Home</a>
+    <a href="/browse">Browse</a>
+    <a href="/browse?provider=dramabox">DramaBox</a>
+    <a href="/browse?provider=reelshort">ReelShort</a>
+    <a href="/browse?provider=shorttv">ShortMax</a>
+    <a href="/browse?provider=goodshort">GoodShort</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-search">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="navSearch" placeholder="Search dramas...">
+    </div>
+    <div class="nav-avatar" id="navAvatar">
+      <span id="navAvatarInitial">U</span>
+      <div class="nav-dropdown" id="navDropdown">
+        <div style="padding:.5rem .75rem .25rem; font-size:.8rem; color:var(--text3)">Signed in as</div>
+        <div style="padding:0 .75rem .5rem; font-size:.875rem; font-weight:600" id="navUsername">User</div>
+        <hr>
+        <a href="/" id="adminLink" class="hidden">
+          <svg width="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+          Admin Panel
+        </a>
+        <button onclick="NS.logout()">
+          <svg width="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="heroSection">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-content" id="heroContent">
+    <div class="hero-badge">🔥 Featured Drama</div>
+    <h1 class="hero-title" id="heroTitle">Loading...</h1>
+    <p class="hero-desc" id="heroDesc"></p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4"/></svg>
+        <span id="heroEps">— eps</span>
+      </div>
+      <div class="hero-meta-item">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        <span id="heroViews">0 views</span>
+      </div>
+    </div>
+    <div id="heroGenres" class="hero-genres"></div>
+    <div class="hero-actions" style="margin-top:1.5rem">
+      <a href="#" id="heroWatchBtn" class="btn btn-primary btn-lg">
+        <svg width="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Watch Now
+      </a>
+      <a href="#" id="heroDetailsBtn" class="btn btn-outline btn-lg">More Info</a>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<main>
+  <!-- Stats bar -->
+  <div style="display:flex; gap:2rem; padding:1.5rem 2rem; border-bottom:1px solid var(--border); background:var(--bg2); flex-wrap:wrap">
+    <div style="font-size:.875rem; color:var(--text2)">📚 <strong id="statDramas" style="color:var(--text)">—</strong> Dramas</div>
+    <div style="font-size:.875rem; color:var(--text2)">🎬 <strong id="statEps" style="color:var(--text)">—</strong> Episodes</div>
+    <div style="font-size:.875rem; color:var(--text2)">🔴 <strong style="color:var(--accent2)">DramaBox</strong></div>
+    <div style="font-size:.875rem; color:var(--text2)">🔵 <strong style="color:#60a5fa">ReelShort</strong></div>
+    <div style="font-size:.875rem; color:var(--text2)">🟢 <strong style="color:#34d399">ShortMax</strong></div>
+    <div style="font-size:.875rem; color:var(--text2)">🟡 <strong style="color:#fbbf24">GoodShort</strong></div>
+  </div>
+
+  <!-- Featured section -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-title">🔥 Most Popular</div>
+      <a href="/browse" class="see-all">See all →</a>
+    </div>
+    <div class="drama-grid lg" id="popularGrid"></div>
+  </section>
+
+  <!-- By Provider sections -->
+  <section class="section" style="background:var(--bg2); border-top:1px solid var(--border)">
+    <div class="section-header">
+      <div class="section-title" style="--accent:#7c3aed; --accent2:#a855f7">🟣 DramaBox</div>
+      <a href="/browse?provider=dramabox" class="see-all">See all →</a>
+    </div>
+    <div class="drama-grid" id="dramaboxGrid"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <div class="section-title">🔵 ReelShort</div>
+      <a href="/browse?provider=reelshort" class="see-all">See all →</a>
+    </div>
+    <div class="drama-grid" id="reelshortGrid"></div>
+  </section>
+
+  <section class="section" style="background:var(--bg2); border-top:1px solid var(--border)">
+    <div class="section-header">
+      <div class="section-title">🟢 ShortMax</div>
+      <a href="/browse?provider=shorttv" class="see-all">See all →</a>
+    </div>
+    <div class="drama-grid" id="shorttvGrid"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <div class="section-title">🟡 GoodShort</div>
+      <a href="/browse?provider=goodshort" class="see-all">See all →</a>
+    </div>
+    <div class="drama-grid" id="goodshortGrid"></div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer style="padding:2rem; text-align:center; color:var(--text3); font-size:.8rem; border-top:1px solid var(--border)">
+  <p>🐉 NagaStream &copy; 2026 — For personal use only</p>
+  <p style="margin-top:.4rem">Data sourced from DramaBox · ReelShort · ShortMax · GoodShort</p>
+</footer>
+
+<div id="toast-container"></div>
+<script src="/js/app.js"></script>
+<script>
+async function loadHome() {
+  const user = await NS.loadUser()
+  if (!user) return window.location.href = '/login'
+  NS.initNavbar()
+
+  // Stats
+  try {
+    const stats = await NS.api('/admin/stats')
+    document.getElementById('statDramas').textContent = stats.totalDramas.toLocaleString()
+    document.getElementById('statEps').textContent    = stats.totalEpisodes.toLocaleString()
+  } catch {}
+
+  // Featured (hero)
+  try {
+    const featured = await NS.api('/dramas/featured')
+    if (featured.length) {
+      const d = featured[Math.floor(Math.random() * Math.min(featured.length, 5))]
+      document.getElementById('heroTitle').textContent   = d.title
+      document.getElementById('heroDesc').textContent    = d.synopsis || 'A captivating short drama.'
+      document.getElementById('heroEps').textContent     = `${d.total_episodes} episodes`
+      document.getElementById('heroViews').textContent   = `${(d.views||0).toLocaleString()} views`
+      document.getElementById('heroWatchBtn').href       = `/drama/${d.slug}`
+      document.getElementById('heroDetailsBtn').href     = `/drama/${d.slug}`
+      const gEl = document.getElementById('heroGenres')
+      ;(d.genres||[]).slice(0,4).forEach(g => {
+        const span = document.createElement('span')
+        span.className = 'genre-pill'; span.textContent = g
+        gEl.appendChild(span)
+      })
+    }
+  } catch {}
+
+  // Popular
+  const popular = await NS.api('/dramas/featured')
+  document.getElementById('popularGrid').innerHTML = popular.map(d => NS.makeDramaCard(d)).join('')
+
+  // By provider
+  for (const key of ['dramabox','reelshort','shorttv','goodshort']) {
+    try {
+      const data = await NS.api(`/dramas?provider=${key}&limit=12&page=1`)
+      const el   = document.getElementById(`${key}Grid`)
+      if (el) el.innerHTML = data.dramas.length
+        ? data.dramas.map(d => NS.makeDramaCard(d)).join('')
+        : '<p style="color:var(--text3);font-size:.875rem">No dramas yet. Run the scraper first!</p>'
+    } catch {}
+  }
+
+  document.getElementById('loadingScreen').style.display = 'none'
+}
+loadHome()
+</script>
+</body>
+</html>
