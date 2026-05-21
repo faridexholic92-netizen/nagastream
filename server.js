@@ -25,6 +25,9 @@ app.use('/api/', rateLimit({ windowMs: 60*1000, max: 300 }))
 // Static files
 app.use(express.static(path.join(__dirname, 'public')))
 
+// Health check
+app.get('/health', (_, res) => res.status(200).json({ status: 'ok' }))
+
 // ── API Routes ────────────────────────────────────────────
 app.use('/api/auth',   require('./routes/auth'))
 app.use('/api/dramas', require('./routes/dramas'))
@@ -44,8 +47,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' })
 })
 
-app.listen(PORT, () => {
-  console.log(`\n🐉 NagaStream running at http://localhost:${PORT}`)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n🐉 NagaStream running at http://0.0.0.0:${PORT}`)
   console.log(`   Login: master / NagaStream@2026`)
-  console.log(`   Admin: http://localhost:${PORT}/admin\n`)
+  console.log(`   Admin: http://0.0.0.0:${PORT}/admin\n`)
 })
