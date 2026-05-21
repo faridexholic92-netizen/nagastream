@@ -3,12 +3,16 @@ const bcrypt = require('bcryptjs')
 const path = require('path')
 const fs = require('fs')
 
-// DB path: env var → /tmp (Render free) → local
+// DB path resolution:
+// 1. DB_PATH env var (set manually in Railway dashboard)
+// 2. /app/data (Railway persistent volume mount)
+// 3. /tmp (fallback)
+// 4. local __dirname (dev)
 function resolveDbPath() {
   if (process.env.DB_PATH) return process.env.DB_PATH
 
-  // Try writable dirs in order
   const candidates = [
+    path.join('/app/data', 'nagastream.db'),
     path.join('/tmp', 'nagastream.db'),
     path.join(__dirname, 'nagastream.db'),
   ]
@@ -16,12 +20,11 @@ function resolveDbPath() {
     try {
       const dir = path.dirname(p)
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-      // Test write
       fs.accessSync(dir, fs.constants.W_OK)
       return p
     } catch {}
   }
-  return candidates[1]
+  return candidates[2]
 }
 
 const DB_PATH = resolveDbPath()
