@@ -1,9 +1,18 @@
 const Database = require('better-sqlite3')
 const bcrypt = require('bcryptjs')
 const path = require('path')
+const fs = require('fs')
 
 // Render persistent disk mounts at /data, fallback to local for dev
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nagastream.db')
+
+// Auto-create directory if not exist (Render disk may not pre-create)
+const DB_DIR = path.dirname(DB_PATH)
+if (!fs.existsSync(DB_DIR)) {
+  fs.mkdirSync(DB_DIR, { recursive: true })
+  console.log('[DB] Created directory:', DB_DIR)
+}
+
 const db = new Database(DB_PATH)
 
 db.pragma('journal_mode = WAL')
