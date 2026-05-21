@@ -3,15 +3,29 @@ const bcrypt = require('bcryptjs')
 const path = require('path')
 const fs = require('fs')
 
-// Render persistent disk mounts at /data, fallback to local for dev
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nagastream.db')
+// DB path: env var → /tmp (Render free) → local
+function resolveDbPath() {
+  if (process.env.DB_PATH) return process.env.DB_PATH
 
-// Auto-create directory if not exist (Render disk may not pre-create)
-const DB_DIR = path.dirname(DB_PATH)
-if (!fs.existsSync(DB_DIR)) {
-  fs.mkdirSync(DB_DIR, { recursive: true })
-  console.log('[DB] Created directory:', DB_DIR)
+  // Try writable dirs in order
+  const candidates = [
+    path.join('/tmp', 'nagastream.db'),
+    path.join(__dirname, 'nagastream.db'),
+  ]
+  for (const p of candidates) {
+    try {
+      const dir = path.dirname(p)
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+      // Test write
+      fs.accessSync(dir, fs.constants.W_OK)
+      return p
+    } catch {}
+  }
+  return candidates[1]
 }
+
+const DB_PATH = resolveDbPath()
+console.log('[DB] Using database at:', DB_PATH)
 
 const db = new Database(DB_PATH)
 
